@@ -8,27 +8,21 @@ body {
   font-style: normal;
   color: #3e3e3e;
   width: 100vw;
+  height: 100vh;
 }
 
 button {
   padding: 20px;
-  background-color: #8751ae;
+  background-color: transparent;
+  border-radius: 5px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
   outline: none;
   padding: 10px;
-  max-width: 200px;
+  width: 100%;
   appearance: none;
   font-weight: bold;
-  font-size: 18px;
-  letter-spacing: 1px;
-  color: white;
-  transition: all 0.2s;
-  &:hover {
-    background-color: #e88181;
-    transition: all 0.2s;
-  }
+  font-size: 20px;
 }
 
 div {
@@ -43,10 +37,10 @@ h3 {
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 30px;
 }
 h2 {
-  font-size: 20px;
+  font-size: 24px;
 }
 h3 {
   font-size: 18px;
@@ -59,13 +53,14 @@ p {
   padding: 10px;
 }
 
-.roulette {
-  margin-bottom: 20px;
-}
-
-.roulette-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
+.u-text-align {
+  &--center {
+    text-align: center;
+  }
+  &--right {
+    text-align: right;
+  }
+  &--left {
+    text-align: left;
+  }
 }

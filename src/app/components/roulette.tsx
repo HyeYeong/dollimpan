@@ -1,8 +1,8 @@
-// src/app/pages.tsx
 "use client"; // Next.js 13+에서는 클라이언트 컴포넌트로 명시
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import "@styles/roulette.scss";
 
 // SSR 비활성화
 const Wheel = dynamic(
@@ -12,18 +12,24 @@ const Wheel = dynamic(
 
 const optionsData = [
   { option: "😅 110" },
-  { option: "🍬 150" },
-  { option: "🍦 180" },
+  { option: "🍬 140" },
+  { option: "🍦 200" },
   { option: "🍣 350" },
   { option: "💰 500" },
-  { option: "💸 OPPS" },
   { option: "💠 다이아" },
+  { option: "돌아 소길!" },
 ];
+
+type PrizeOption = {
+  option: string;
+  updated: string;
+};
 
 export default function Roulette() {
   const [mustSpin, setMustSpin] = useState(false);
-  const [prizeNumber, setPrizeNumber] = useState(0);
+  const [prizeNumber, setPrizeNumber] = useState<null | number>(null);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [prizeList, setPrizeList] = useState<PrizeOption[]>([]);
 
   const handleSpinClick = () => {
     const newPrizeNumber = Math.floor(Math.random() * optionsData.length);
@@ -32,35 +38,74 @@ export default function Roulette() {
     setIsSpinning(true);
   };
 
+  useEffect(() => {
+    if (!isSpinning && !mustSpin && prizeNumber !== null) {
+      const currentDate = new Date().toLocaleString();
+      setPrizeList((prevList) => [
+        ...prevList,
+        { option: optionsData[prizeNumber].option, updated: currentDate },
+      ]);
+    }
+  }, [isSpinning, mustSpin, prizeNumber]);
+
   return (
     <div className="roulette-container">
-      <button onClick={handleSpinClick}>룰렛돌리기 🎯</button>
-
+      <button className="roulette-button" onClick={handleSpinClick}>
+        룰렛돌리기🎯
+      </button>
+      {!isSpinning && prizeNumber !== null && (
+        <h3 className="prize">
+          오늘의 결과: {optionsData[prizeNumber].option}
+        </h3>
+      )}
       <div className="roulette">
         <Wheel
           mustStartSpinning={mustSpin}
           prizeNumber={prizeNumber}
           data={optionsData}
-          backgroundColors={["#ffdaeb", "#f8eeff"]}
+          backgroundColors={["#ffd2d2", "#fefefe"]}
           textColors={["#3e3e3e"]}
-          onStopSpinning={() => setMustSpin(false)}
-          // style={{
-          //   width: "300px", // 크기 조정
-          //   height: "300px", // 크기 조정
-          // }}
-          spinDuration={1}
-          startingDegree={0}
+          fontSize={30}
+          onStopSpinning={() => {
+            setMustSpin(false);
+            setIsSpinning(false); // 룰렛이 멈추면 isSpinning을 false로 설정
+          }}
+          outerBorderColor="#3e3e3e"
+          outerBorderWidth={2}
+          spinDuration={0.4}
         />
       </div>
-      {!isSpinning && (
-        <div className="prize">🎉 결과: {optionsData[prizeNumber].option}</div>
-      )}
-      {/* <div className="prize">{optionsData[prizeNumber].option}</div> */}
-      <h2>업데이트 필요한 내용</h2>
-      <p>build & deploy</p>
-      <p>룰렛 크기 조정, 속도</p>
-      <p>하루에 한번만 돌릴 수 있게 제한</p>
-      <p>localstorage 로 매일, 매달 기록</p>
+      <div className="prize-list">
+        <h3>지난 결과</h3>
+        <small>새로고침 시 기록 사라짐</small>
+        {prizeList.map((item: PrizeOption, index: number) => (
+          <div className="prize-item" key={index}>
+            <p>
+              {item.option}{" "}
+              <span className="prize-item-updated">{item.updated}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+      <hr />
+      <hr />
+      <hr />
+      <small>이 아래는 아직 개발중. 아무런 기능 없음</small>
+      <div className="roulette-reset">
+        <button
+          className="roulette-reset-button"
+          onClick={() => console.log("remove")}
+        >
+          기록 지우기
+        </button>
+        <button
+          className="roulette-reset-button"
+          onClick={() => console.log("one more")}
+        >
+          ???
+          {/* 제발 한번만 더! */}
+        </button>
+      </div>
     </div>
   );
 }
