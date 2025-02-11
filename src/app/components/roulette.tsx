@@ -61,7 +61,7 @@ export default function Roulette() {
       <div className="roulette">
         <Wheel
           mustStartSpinning={mustSpin}
-          prizeNumber={prizeNumber}
+          prizeNumber={prizeNumber ?? 0}
           data={optionsData}
           backgroundColors={["#ffd2d2", "#fefefe"]}
           textColors={["#3e3e3e"]}
