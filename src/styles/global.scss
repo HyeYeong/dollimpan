@@ -10,6 +10,27 @@ body {
   width: 100vw;
 }
 
+button {
+  padding: 20px;
+  background-color: #8751ae;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  padding: 10px;
+  max-width: 200px;
+  appearance: none;
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: white;
+  transition: all 0.2s;
+  &:hover {
+    background-color: #e88181;
+    transition: all 0.2s;
+  }
+}
+
 div {
   margin: 0;
   padding: 0;
@@ -21,5 +42,30 @@ h3 {
   color: #333;
 }
 
+h1 {
+  font-size: 24px;
+}
+h2 {
+  font-size: 20px;
+}
+h3 {
+  font-size: 18px;
+}
+
 p {
+}
+
+.l-container {
+  padding: 10px;
+}
+
+.roulette {
+  margin-bottom: 20px;
+}
+
+.roulette-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
