@@ -10,64 +10,92 @@ const Wheel = dynamic(
   { ssr: false }
 );
 
-const optionsData = [
-  { option: "😅 110" },
-  { option: "🍬 140" },
-  { option: "🍦 200" },
-  { option: "🍣 350" },
-  { option: "💰 500" },
-  { option: "💠 다이아" },
-  { option: "돌아 소길!" },
-];
-
 type PrizeOption = {
   option: string;
   updated: string;
 };
 
+type OptionData = {
+  option: string;
+  probability: number;
+  min?: number;
+  max?: number;
+};
+
+const optionsData: OptionData[] = [
+  { option: "😅", probability: 28, min: 100, max: 130 },
+  { option: "🍬", probability: 20, min: 140, max: 160 },
+  { option: "🍦", probability: 15, min: 170, max: 220 },
+  { option: "🍣", probability: 10, min: 280, max: 380 },
+  { option: "💰", probability: 9, min: 460, max: 550 },
+  { option: "💠 다이아", probability: 8 },
+  { option: "돌아 소길!", probability: 10 }
+];
+
+const getRandomValue = (min?: number, max?: number): string => {
+  if (min !== undefined && max !== undefined) {
+    const randomValue = Math.random() * (max - min) + min;
+    return `${Math.ceil(randomValue / 10) * 10}`; // 일의 자리 올림 적용
+  }
+  return "";
+};
+
+const getDailyOptions = (): { option: string }[] => {
+  return optionsData.map((item) => ({
+    option: item.option + " " + getRandomValue(item.min, item.max)
+  }));
+};
+
+const weightedRandom = (): number => {
+  const cumulative: number[] = [];
+  let sum = 0;
+  for (const { probability } of optionsData) {
+    sum += probability;
+    cumulative.push(sum);
+  }
+  const rand = Math.random() * sum;
+  return cumulative.findIndex((value) => rand < value);
+};
+
 export default function Roulette() {
-  const [mustSpin, setMustSpin] = useState(false);
-  const [prizeNumber, setPrizeNumber] = useState<null | number>(null);
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [mustSpin, setMustSpin] = useState<boolean>(false);
+  const [prizeNumber, setPrizeNumber] = useState<number | null>(null);
+  const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [prizeList, setPrizeList] = useState<PrizeOption[]>([]);
-  const [isSpinDisabled, setIsSpinDisabled] = useState(false);
-  const [resetCount, setResetCount] = useState(0);
+  const [isSpinDisabled, setIsSpinDisabled] = useState<boolean>(false);
+  const [resetCount, setResetCount] = useState<number>(0);
   const MAX_COUNT = 7;
+  const [dailyOptions, setDailyOptions] = useState<{ option: string }[]>([]);
 
   useEffect(() => {
-    const saveResults = localStorage.getItem("prizeHistory");
+    const today = new Date().toDateString();
+    const savedOptions = localStorage.getItem("dailyOptions");
     const lastSpinDate = localStorage.getItem("lastSpinDate");
-    const resetData = JSON.parse(
-      localStorage.getItem("resetLimitData") || "{}"
-    );
-    if (saveResults) {
-      setPrizeList(JSON.parse(saveResults));
-    }
-    if (lastSpinDate) {
-      const today = new Date().toDateString();
-      // ✅ 마지막 스핀 날짜가 오늘과 같으면 비활성화
-      setIsSpinDisabled(lastSpinDate === today);
+    const resetData = JSON.parse(localStorage.getItem("resetLimitData") || "{}");
+
+    if (!savedOptions || lastSpinDate !== today) {
+      const newOptions = getDailyOptions();
+      localStorage.setItem("dailyOptions", JSON.stringify(newOptions));
+      setDailyOptions(newOptions);
     } else {
-      // ✅ 로컬스토리지에 데이터가 없으면 기본값으로 false 설정
-      setIsSpinDisabled(false);
+      setDailyOptions(JSON.parse(savedOptions));
     }
 
-    // ✅ 이번 달의 제한 해제 카운트 확인
+    const savedResults = localStorage.getItem("prizeHistory");
+    if (savedResults) setPrizeList(JSON.parse(savedResults));
+
+    setIsSpinDisabled(lastSpinDate === today);
     const currentMonth = new Date().getMonth();
     if (resetData.month === currentMonth) {
       setResetCount(resetData.count);
     } else {
-      // 새로운 달이 되면 카운트 초기화
-      localStorage.setItem(
-        "resetLimitData",
-        JSON.stringify({ month: currentMonth, count: 0 })
-      );
+      localStorage.setItem("resetLimitData", JSON.stringify({ month: currentMonth, count: 0 }));
     }
   }, []);
 
   const handleSpinClick = () => {
-    if (isSpinDisabled) return; // 오늘 돌렸을 경우 제한
-    const newPrizeNumber = Math.floor(Math.random() * optionsData.length);
+    if (isSpinDisabled) return;
+    const newPrizeNumber = weightedRandom();
     setPrizeNumber(newPrizeNumber);
     setMustSpin(true);
     setIsSpinning(true);
@@ -81,10 +109,10 @@ export default function Roulette() {
     setIsSpinning(false);
     if (prizeNumber !== null) {
       const newResult: PrizeOption = {
-        option: optionsData[prizeNumber].option,
+        option: dailyOptions[prizeNumber].option,
         updated: new Date().toLocaleString(),
       };
-      const updatedPrizeList: PrizeOption[] = [newResult, ...prizeList]; // 최신 결과를 맨 위로 추가
+      const updatedPrizeList = [newResult, ...prizeList];
       setPrizeList(updatedPrizeList);
       localStorage.setItem("prizeHistory", JSON.stringify(updatedPrizeList));
     }
@@ -130,7 +158,7 @@ export default function Roulette() {
         <Wheel
           mustStartSpinning={mustSpin}
           prizeNumber={prizeNumber ?? 0}
-          data={optionsData}
+          data={dailyOptions}
           backgroundColors={["#ffd2d2", "#fefefe"]}
           textColors={["#3e3e3e"]}
           fontSize={30}
