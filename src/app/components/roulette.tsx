@@ -23,13 +23,13 @@ type OptionData = {
 };
 
 const optionsData: OptionData[] = [
-  { option: "😅", probability: 28, min: 100, max: 130 },
-  { option: "🍬", probability: 20, min: 140, max: 160 },
-  { option: "🍦", probability: 15, min: 170, max: 220 },
-  { option: "🍣", probability: 10, min: 280, max: 380 },
-  { option: "💰", probability: 9, min: 460, max: 550 },
-  { option: "💠 다이아", probability: 8 },
-  { option: "돌아 소길!", probability: 10 }
+  { option: "걍길", probability: 28 },
+  { option: "소길", probability: 20 },
+  { option: "중길", probability: 15 },
+  { option: "대길 ", probability: 10 },
+  { option: "王王大吉", probability: 9 },
+  { option: "💠다이아💠", probability: 8 },
+  { option: "돌아소길", probability: 10 },
 ];
 
 const getRandomValue = (min?: number, max?: number): string => {
